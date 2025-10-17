@@ -272,7 +272,7 @@ export default function IndexPage() {
   // Poll every 5s for near-real-time updates
   useEffect(() => {
     fetchUplinks();
-    const id = setInterval(fetchUplinks, 2000);
+    const id = setInterval(fetchUplinks, 5000);
     return () => clearInterval(id);
   }, []);
 
