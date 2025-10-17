@@ -51,6 +51,7 @@
     "@heroui/tooltip": "2.2.24",
     "@heroui/use-theme": "^2.1.10",
     "@heroui/user": "2.2.22",
+    "@lottiefiles/dotlottie-react": "^0.17.5",
     "@react-aria/ssr": "3.9.10",
     "@react-aria/visually-hidden": "3.8.28",
     "clsx": "2.1.1",

@@ -12,8 +12,7 @@ import {
 } from "@heroui/table";
 // No UI imports required for actions; using simple cells for stress fields
 
-
-export const columns = [
+const columns = [
   { name: "NAME", uid: "name" },
   { name: "STRESS LEVEL", uid: "stress_level" },
   // { name: "STRESS STATUS", uid: "stress_status" },
