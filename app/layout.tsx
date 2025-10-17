@@ -45,7 +45,7 @@ export default function RootLayout({
         <Providers themeProps={{ attribute: "class", defaultTheme: "dark" }}>
           <div className="relative flex h-screen">
             <Sidebar />
-            <main className="flex-1 container mx-auto max-w-7xl pt-16 px-6 overflow-auto">
+            <main className="flex-1 container mx-auto max-w-7xl pt-16 px-6 overflow-auto lg:ml-0">
               {children}
             </main>
           </div>

@@ -9,6 +9,8 @@ import {
   Waves,
   ChevronLeft,
   ChevronRight,
+  Menu,
+  X,
 } from "lucide-react";
 import { useState } from "react";
 import clsx from "clsx";
@@ -19,6 +21,7 @@ interface SidebarProps {
 
 export const Sidebar = ({ className }: SidebarProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const menuItems = [
     {
@@ -49,30 +52,56 @@ export const Sidebar = ({ className }: SidebarProps) => {
   ];
 
   return (
-    <aside
-      className={clsx(
-        "fixed left-0 top-0 h-screen bg-content1 border-r border-divider transition-all duration-300 z-40 flex flex-col",
-        isCollapsed ? "w-16" : "w-64",
-        className
-      )}
-    >
-      {/* Logo/Brand */}
-      <div className="flex items-center justify-between p-4 border-b border-divider h-16">
-        {!isCollapsed && (
-          <Link href="/" className="flex items-center gap-2">
-            {/* <Bluetooth className="w-6 h-6 text-primary" /> */}
-            <span className="font-bold text-xl">Agyenkwa</span>
-          </Link>
-        )}
-        {isCollapsed && <Bluetooth className="w-6 h-6 text-primary mx-auto" />}
-      </div>
-
-      {/* Toggle Button */}
+    <>
+      {/* Mobile Menu Button */}
       <Button
         isIconOnly
         size="sm"
         variant="light"
-        className="absolute -right-3 top-20 rounded-full bg-content1 border border-divider"
+        className="fixed top-4 left-4 z-50 lg:hidden bg-content1 border border-divider"
+        onPress={() => setIsMobileOpen(!isMobileOpen)}
+      >
+        {isMobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+      </Button>
+
+      {/* Overlay for mobile */}
+      {isMobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={clsx(
+          "fixed left-0 top-0 h-screen bg-content1 border-r border-divider transition-all duration-300 z-40 flex flex-col",
+          // Desktop styles
+          "lg:translate-x-0",
+          isCollapsed ? "lg:w-16" : "lg:w-64",
+          // Mobile styles - off-canvas by default
+          "w-64",
+          isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+          className
+        )}
+      >
+        {/* Logo/Brand */}
+        <div className="flex items-center justify-between p-4 border-b border-divider h-16">
+          {!isCollapsed && (
+            <Link href="/" className="flex items-center gap-2">
+              {/* <Bluetooth className="w-6 h-6 text-primary" /> */}
+              <span className="font-bold text-xl">Agyenkwa</span>
+            </Link>
+          )}
+          {isCollapsed && <Bluetooth className="w-6 h-6 text-primary mx-auto" />}
+        </div>
+
+      {/* Desktop Toggle Button - Hidden on mobile */}
+      <Button
+        isIconOnly
+        size="sm"
+        variant="light"
+        className="hidden lg:flex absolute -right-3 top-20 rounded-full bg-content1 border border-divider"
         onPress={() => setIsCollapsed(!isCollapsed)}
       >
         {isCollapsed ? (
@@ -121,5 +150,6 @@ export const Sidebar = ({ className }: SidebarProps) => {
         )}
       </div>
     </aside>
+    </>
   );
 };
