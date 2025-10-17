@@ -122,143 +122,136 @@ export default function IndexPage() {
     return out;
   }
 
-  async function fetchUplinks() {
+  // Fetch S3 data as fallback
+  async function fetchS3Data() {
     try {
-      setLoading(true);
-      console.log("🔄 Fetching data from TTN and S3...");
+      console.log("📦 Fetching S3 data...");
+      const s3Res = await fetch("/api/s3-data", { cache: "no-store" });
       
-      // Fetch TTN data
-      const params = new URLSearchParams({ last: "24h", limit: "10" });
-      const res = await fetch(`${TTN_BASE_URL}?${params.toString()}`, {
-        headers: {
-          Authorization: `Bearer ${TTN_API_KEY}`,
-          Accept: "text/event-stream, application/x-ndjson, application/json",
-        },
-        cache: "no-store",
-      });
+      if (s3Res.ok) {
+        const s3Json = await s3Res.json();
+        const rawS3 = s3Json.data;
 
-      let ttnData: any = null;
-      if (res.ok) {
-        const text = await res.text();
-        let ttnMessages = parseNdjson(text);
-        if (ttnMessages.length === 0) {
-          try {
-            const json = JSON.parse(text);
-            if (Array.isArray(json)) ttnMessages = json;
-            else if (json && json.result) ttnMessages = json.result;
-            else ttnMessages = [json];
-          } catch (e) {
-            // nothing
-          }
-        }
-        
-        // Get the latest message from TTN
-        if (ttnMessages.length > 0) {
-          const latest = ttnMessages[0]; // Assuming first is latest
-          const result = latest.result || latest;
-          const uplink = result.uplink_message || result;
-          const ids = result.end_device_ids || {};
-          const decoded = uplink.decoded_payload || {};
-          
-          ttnData = {
+        if (rawS3) {
+          const decoded = rawS3.decoded_payload || rawS3;
+          const s3Data = {
             name: DEVICE_NAME,
-            stress_level: decoded.stress_level || 0,
-            timestamp: decoded.timestamp_iso || uplink.received_at,
-            received_at: uplink.received_at,
+            stress_level: decoded.stress_level || rawS3.stress_level || 0,
+            timestamp: decoded.timestamp_iso || rawS3.timestamp || rawS3.upload_timestamp,
+            received_at: rawS3.timestamp || rawS3.upload_timestamp,
             decoded_payload: decoded,
-            avatar: "https://i.pravatar.cc/150?u=ttn",
-            email: ids.dev_eui || "",
-            source: "TTN"
+            avatar: "https://i.pravatar.cc/150?u=s3",
+            email: rawS3.device_address || "",
+            source: "S3",
           };
-          
-          console.log("📡 TTN latest data:", {
-            stress: ttnData.stress_level,
-            timestamp: ttnData.timestamp,
-            source: "TTN"
+
+          console.log("📦 S3 data:", {
+            stress: s3Data.stress_level,
+            timestamp: s3Data.timestamp,
+            source: "S3",
           });
+
+          updateIfNewer(s3Data);
         }
       } else {
-        console.warn("❌ TTN fetch failed", res.status);
+        console.warn("❌ S3 fetch failed", s3Res.status);
       }
-
-      // Fetch S3 data
-      let s3Data: any = null;
-      try {
-        const s3Res = await fetch("/api/s3-data", { cache: "no-store" });
-        if (s3Res.ok) {
-          const s3Json = await s3Res.json();
-          const rawS3 = s3Json.data;
-          
-          if (rawS3) {
-            const decoded = rawS3.decoded_payload || rawS3;
-            s3Data = {
-              name: DEVICE_NAME,
-              stress_level: decoded.stress_level || rawS3.stress_level || 0,
-              timestamp: decoded.timestamp_iso || rawS3.timestamp || rawS3.upload_timestamp,
-              received_at: rawS3.timestamp || rawS3.upload_timestamp,
-              decoded_payload: decoded,
-              avatar: "https://i.pravatar.cc/150?u=s3",
-              email: rawS3.device_address || "",
-              source: "S3"
-            };
-            
-            console.log("📦 S3 latest data:", {
-              stress: s3Data.stress_level,
-              timestamp: s3Data.timestamp,
-              source: "S3"
-            });
-          }
-        } else {
-          console.warn("❌ S3 fetch failed", s3Res.status);
-        }
-      } catch (e) {
-        console.warn("❌ S3 fetch error", e);
-      }
-
-      // Compare and update with the newest data
-      const candidates = [ttnData, s3Data].filter(Boolean);
-      
-      if (candidates.length === 0) {
-        console.warn("⚠️ No data received from any source");
-        setLoading(false);
-        return;
-      }
-
-      console.log(`📊 Comparing ${candidates.length} data source(s)...`);
-      
-      // Compare stress levels and timestamps
-      if (candidates.length === 2) {
-        const [data1, data2] = candidates;
-        console.log("🔍 Comparison:", {
-          TTN: { stress: ttnData?.stress_level, time: ttnData?.timestamp },
-          S3: { stress: s3Data?.stress_level, time: s3Data?.timestamp }
-        });
-        
-        // Check if they have the same stress level
-        if (data1.stress_level === data2.stress_level) {
-          console.log("✅ Both sources have same stress level:", data1.stress_level);
-        } else {
-          console.log("⚠️ Different stress levels - TTN:", data1.stress_level, "S3:", data2.stress_level);
-        }
-      }
-      
-      // Try updating with each candidate (store will keep the newest)
-      candidates.forEach(data => {
-        updateIfNewer(data);
-      });
-      
-      setLoading(false);
     } catch (e) {
-      console.error("❌ fetchUplinks error", e);
-      setLoading(false);
+      console.warn("❌ S3 fetch error", e);
     }
   }
 
-  // Poll every 5s for near-real-time updates
+  // Process incoming MQTT uplink message
+  function processMQTTUplink(uplinkData: any) {
+    try {
+      const uplink = uplinkData.uplink_message || uplinkData;
+      const ids = uplinkData.end_device_ids || {};
+      const decoded = uplink.decoded_payload || {};
+
+      const ttnData = {
+        name: DEVICE_NAME,
+        stress_level: decoded.stress_level || 0,
+        timestamp: decoded.timestamp_iso || uplink.received_at,
+        received_at: uplink.received_at,
+        decoded_payload: decoded,
+        avatar: "https://i.pravatar.cc/150?u=ttn",
+        email: ids.dev_eui || "",
+        source: "TTN-MQTT",
+      };
+
+      console.log("📡 MQTT uplink processed:", {
+        stress: ttnData.stress_level,
+        timestamp: ttnData.timestamp,
+        source: "TTN-MQTT",
+      });
+
+      updateIfNewer(ttnData);
+    } catch (e) {
+      console.error("❌ Error processing MQTT uplink:", e);
+    }
+  }
+
+  // Real-time MQTT + periodic S3 fallback
   useEffect(() => {
-    fetchUplinks();
-    const id = setInterval(fetchUplinks, 5000);
-    return () => clearInterval(id);
+    let mounted = true;
+    let eventSource: EventSource | null = null;
+
+    // Connect to MQTT stream
+    function connectMQTT() {
+      console.log("🔌 Connecting to MQTT stream...");
+      eventSource = new EventSource("/api/mqtt-stream");
+
+      eventSource.onopen = () => {
+        console.log("✅ MQTT stream connected");
+        setLoading(false);
+      };
+
+      eventSource.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          
+          if (message.type === 'uplink') {
+            processMQTTUplink(message.data);
+          } else if (message.type === 'connected') {
+            console.log("🎉 MQTT stream ready");
+          } else if (message.type === 'keepalive') {
+            // Silent keepalive
+          }
+        } catch (e) {
+          console.error("❌ Error parsing SSE message:", e);
+        }
+      };
+
+      eventSource.onerror = (error) => {
+        console.error("❌ MQTT stream error:", error);
+        eventSource?.close();
+        
+        // Reconnect after 5 seconds if still mounted
+        if (mounted) {
+          setTimeout(() => {
+            if (mounted) connectMQTT();
+          }, 5000);
+        }
+      };
+    }
+
+    // Start MQTT connection
+    connectMQTT();
+
+    // Poll S3 as fallback every 30 seconds
+    const s3Interval = setInterval(() => {
+      if (mounted) fetchS3Data();
+    }, 30000);
+
+    // Initial S3 fetch
+    fetchS3Data();
+
+    // Cleanup
+    return () => {
+      mounted = false;
+      eventSource?.close();
+      clearInterval(s3Interval);
+    };
   }, []);
 
   return (
