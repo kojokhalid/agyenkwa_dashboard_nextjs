@@ -9,6 +9,7 @@
     "lint": "eslint --fix"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.911.0",
     "@heroui/accordion": "2.2.24",
     "@heroui/alert": "2.2.27",
     "@heroui/autocomplete": "2.3.29",
@@ -48,12 +49,14 @@
     "@heroui/theme": "2.4.23",
     "@heroui/toast": "2.0.17",
     "@heroui/tooltip": "2.2.24",
+    "@heroui/use-theme": "^2.1.10",
     "@heroui/user": "2.2.22",
     "@react-aria/ssr": "3.9.10",
     "@react-aria/visually-hidden": "3.8.28",
     "clsx": "2.1.1",
     "framer-motion": "11.18.2",
     "intl-messageformat": "10.7.16",
+    "lucide-react": "^0.546.0",
     "next": "15.3.1",
     "next-themes": "0.4.6",
     "react": "18.3.1",
