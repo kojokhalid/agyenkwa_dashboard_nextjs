@@ -19,8 +19,6 @@ const columns = [
   { name: "SOURCE", uid: "source" },
 ];
 
-const DEVICE_NAME = "Agyenkwa Device";
-
 export default function IndexPage() {
   const { deviceData, isLoading } = useDeviceStore();
   const { isInitialized } = useDeviceDataContext();
@@ -32,10 +30,18 @@ export default function IndexPage() {
       case "name":
         return (
           <div className="flex items-center gap-2">
-            <Avatar src={deviceData.avatar} name={deviceData.username || deviceData.name} className="flex-shrink-0" size="sm" />
+            <span className="text-sm font-medium">
+              <Avatar
+                getInitials={(name: string) => name.charAt(0)}
+                name={deviceData.username ? deviceData.username : "Guest"}
+                size="sm"
+              />
+            </span>
             <div className="flex flex-col">
-              <p className="text-bold text-sm">{deviceData.username || deviceData.name || DEVICE_NAME}</p>
-              <p className="text-sm text-default-400">{deviceData.email}</p>
+              <p className="text-bold text-sm">
+                {deviceData.username ? deviceData.username : "Uknown User"}
+              </p>
+              
             </div>
           </div>
         );

@@ -33,7 +33,7 @@ export function DeviceDataProvider({ children }: { children: React.ReactNode }) 
         if (rawMongo) {
           const decoded = rawMongo.decoded_payload || rawMongo;
           const mongoData = {
-            name: DEVICE_NAME,
+            name: rawMongo.username,
             username: rawMongo.username || decoded.username || "",
             stress_level: decoded.stress_level || rawMongo.stress_level || 0,
             timestamp:
@@ -48,7 +48,10 @@ export function DeviceDataProvider({ children }: { children: React.ReactNode }) 
             decoded_payload: decoded,
             avatar: "https://i.pravatar.cc/150?u=mongodb",
             email: rawMongo.device_address || rawMongo.dev_eui || "",
-            source: rawMongo.upload_method === "ttn_webhook" ? "TTN Webhook" : "MongoDB",
+            source:
+              rawMongo.upload_method === "ttn_webhook"
+                ? "TTN Webhook"
+                : "MongoDB",
           };
 
           console.log("🗄️ MongoDB data:", {
