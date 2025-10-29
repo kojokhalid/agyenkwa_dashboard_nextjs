@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       console.error("❌ MongoDB configuration missing");
       return NextResponse.json(
         { error: "Database configuration missing" },
-        { status: 200 }
+        { status: 500 }
       );
     }
 
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
         error: "Failed to process webhook",
         details: error.message,
       },
-      { status: 500 }
+      { status: 200 }
     );
   }
 }
