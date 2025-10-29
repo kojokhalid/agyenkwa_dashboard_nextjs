@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       console.error("❌ MongoDB configuration missing");
       return NextResponse.json(
         { error: "Database configuration missing" },
-        { status: 500 }
+        { status: 200 }
       );
     }
 
