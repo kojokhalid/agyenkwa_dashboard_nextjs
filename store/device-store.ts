@@ -2,6 +2,7 @@ import { create } from 'zustand';
 
 interface DeviceData {
   name: string;
+  username?: string;
   stress_level: number;
   timestamp: string;
   source: string;
