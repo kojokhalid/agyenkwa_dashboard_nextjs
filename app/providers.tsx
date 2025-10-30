@@ -26,10 +26,12 @@ export function Providers({ children, themeProps }: ProvidersProps) {
 
   return (
     <HeroUIProvider navigate={router.push}>
-      <NextThemesProvider {...themeProps}>
-        <DeviceDataProvider>
-          {children}
-        </DeviceDataProvider>
+      <NextThemesProvider
+        {...themeProps}
+        enableSystem={false}
+        disableTransitionOnChange
+      >
+        <DeviceDataProvider>{children}</DeviceDataProvider>
       </NextThemesProvider>
     </HeroUIProvider>
   );

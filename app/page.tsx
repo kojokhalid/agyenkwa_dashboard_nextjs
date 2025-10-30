@@ -31,12 +31,19 @@ export default function IndexPage() {
   // Initialize audio
   useEffect(() => {
     if (typeof window !== "undefined") {
-      audioRef.current =
-        new AudioContext() || new (window as any).webkitAudioContext();
+      try {
+        const AudioContextClass =
+          window.AudioContext || (window as any).webkitAudioContext;
+        audioRef.current = new AudioContextClass();
+      } catch (error) {
+        console.error("Failed to initialize AudioContext:", error);
+      }
     }
     return () => {
       if (audioRef.current) {
-        audioRef.current.close();
+        audioRef.current.close().catch(() => {
+          // Ignore errors when closing
+        });
       }
     };
   }, []);

@@ -10,6 +10,8 @@ import { Sidebar } from "@/components/sidebar";
 import { SidebarProvider } from "@/contexts/SidebarContext";
 import { MainContent } from "@/components/main-content";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: {
     default: siteConfig.name,
