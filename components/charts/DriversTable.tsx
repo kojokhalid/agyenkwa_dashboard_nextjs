@@ -70,11 +70,13 @@ export const DriversTable: React.FC<DriversTableProps> = ({
             <div className="flex items-center gap-2">
               <Avatar
                 getInitials={(name: string) => name.charAt(0)}
-                name={item.username}
+                name={item.username ? item.username : "User1"}
                 size="sm"
               />
               <div className="flex flex-col">
-                <p className="text-bold text-sm">{item.username || "User1"}</p>
+                <p className="text-bold text-sm">
+                  {item.username ? item.username : "User1"}
+                </p>
               </div>
             </div>
           );
