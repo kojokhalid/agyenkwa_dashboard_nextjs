@@ -4,11 +4,11 @@ import { Link } from "@heroui/link";
 import clsx from "clsx";
 
 import { Providers } from "./providers";
-
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
-import { Navbar } from "@/components/navbar";
 import { Sidebar } from "@/components/sidebar";
+import { SidebarProvider } from "@/contexts/SidebarContext";
+import { MainContent } from "@/components/main-content";
 
 export const metadata: Metadata = {
   title: {
@@ -39,16 +39,16 @@ export default function RootLayout({
       <body
         className={clsx(
           "min-h-screen text-foreground bg-background font-sans antialiased",
-          fontSans.variable,
+          fontSans.variable
         )}
       >
         <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
-          <div className="relative flex h-screen">
-            <Sidebar />
-            <main className="flex-1 container mx-auto max-w-7xl pt-16 px-6 overflow-auto lg:ml-0">
-              {children}
-            </main>
-          </div>
+          <SidebarProvider>
+            <div className="relative flex h-screen">
+              <Sidebar />
+              <MainContent>{children}</MainContent>
+            </div>
+          </SidebarProvider>
         </Providers>
       </body>
     </html>

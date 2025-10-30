@@ -11,45 +11,98 @@ import {
   ChevronRight,
   Menu,
   X,
+  LayoutDashboard,
+  Users,
+  UserPlus,
+  BarChart3,
+  TrendingUp,
+  BrainCircuit,
+  Moon,
+  HelpCircle,
+  ChevronDown,
 } from "lucide-react";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import Image from "next/image";
+import { useSidebar } from "@/contexts/SidebarContext";
 
 interface SidebarProps {
   className?: string;
 }
 
 export const Sidebar = ({ className }: SidebarProps) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { isCollapsed, setIsCollapsed } = useSidebar();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>([
+    "drivers",
+    "analytics",
+  ]);
+
+  const pathname = usePathname() ?? "/";
 
   const menuItems = [
     {
-      label: "Home",
-      icon: Home,
+      id: "dashboard",
+      label: "Dashboard",
+      icon: LayoutDashboard,
       href: "/",
     },
     {
-      label: "BLE Devices",
-      icon: Bluetooth,
-      href: "/devices",
+      id: "drivers",
+      label: "Drivers",
+      icon: Users,
+      subItems: [
+        {
+          label: "All Drivers",
+          href: "/drivers",
+        },
+        {
+          label: "Add New Driver",
+          href: "/drivers/new",
+        },
+      ],
     },
     {
-      label: "Live Stream",
-      icon: Waves,
-      href: "/stream",
+      id: "analytics",
+      label: "Analytics & Insights",
+      icon: BarChart3,
+      subItems: [
+        {
+          label: "Fatigue Trends",
+          href: "/analytics/fatigue",
+        },
+        {
+          label: "Driver Comparison",
+          href: "/analytics/comparison",
+        },
+        {
+          label: "Sleep Analytics",
+          href: "/analytics/sleep",
+        },
+      ],
     },
     {
-      label: "Activity Log",
-      icon: Activity,
-      href: "/activity",
-    },
-    {
+      id: "settings",
       label: "Settings",
       icon: Settings,
       href: "/settings",
     },
+    {
+      id: "help",
+      label: "Help & Support",
+      icon: HelpCircle,
+      href: "/help",
+    },
   ];
+
+  const toggleMenu = (menuId: string) => {
+    setExpandedMenus((prev) =>
+      prev.includes(menuId)
+        ? prev.filter((id) => id !== menuId)
+        : [...prev, menuId]
+    );
+  };
 
   return (
     <>
@@ -61,7 +114,11 @@ export const Sidebar = ({ className }: SidebarProps) => {
         className="fixed top-4 left-4 z-50 lg:hidden bg-content1 border border-divider"
         onPress={() => setIsMobileOpen(!isMobileOpen)}
       >
-        {isMobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        {isMobileOpen ? (
+          <X className="w-5 h-5" />
+        ) : (
+          <Menu className="w-5 h-5" />
+        )}
       </Button>
 
       {/* Overlay for mobile */}
@@ -90,66 +147,150 @@ export const Sidebar = ({ className }: SidebarProps) => {
           {!isCollapsed && (
             <Link href="/" className="flex items-center gap-2">
               {/* <Bluetooth className="w-6 h-6 text-primary" /> */}
-              <span className="font-bold text-xl">Agyenkwa</span>
+              <Image src="/logo.png" alt="logo" height={50} width={50} />
+              <span className="font-bold text-xl">lyppo</span>
             </Link>
           )}
-          {isCollapsed && <Bluetooth className="w-6 h-6 text-primary mx-auto" />}
+          {isCollapsed && (
+            // <Bluetooth className="w-6 h-6 text-primary mx-auto" />
+            <Image src="/logo.png" alt="logo" height={50} width={50} />
+          )}
         </div>
 
-      {/* Desktop Toggle Button - Hidden on mobile */}
-      <Button
-        isIconOnly
-        size="sm"
-        variant="light"
-        className="hidden lg:flex absolute -right-3 top-20 rounded-full bg-content1 border border-divider"
-        onPress={() => setIsCollapsed(!isCollapsed)}
-      >
-        {isCollapsed ? (
-          <ChevronRight className="w-4 h-4" />
-        ) : (
-          <ChevronLeft className="w-4 h-4" />
-        )}
-      </Button>
+        {/* Desktop Toggle Button - Hidden on mobile */}
+        <Button
+          isIconOnly
+          size="sm"
+          variant="light"
+          className="hidden lg:flex absolute -right-3 top-20 rounded-full bg-content1 border border-divider"
+          onPress={() => setIsCollapsed(!isCollapsed)}
+        >
+          {isCollapsed ? (
+            <ChevronRight className="w-4 h-4" />
+          ) : (
+            <ChevronLeft className="w-4 h-4" />
+          )}
+        </Button>
 
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-4">
-        <ul className="space-y-2">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={clsx(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-default-100 transition-colors text-default-700 hover:text-primary",
-                    isCollapsed ? "justify-center" : ""
-                  )}
-                >
-                  <Icon className="w-5 h-5 flex-shrink-0" />
-                  {!isCollapsed && (
-                    <span className="text-sm font-medium">{item.label}</span>
-                  )}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto p-4">
+          <ul className="space-y-1">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const hasSubItems = item.subItems && item.subItems.length > 0;
+              const isExpanded = expandedMenus.includes(item.id);
 
-      {/* Footer */}
-      <div className="p-4 border-t border-divider">
-        {!isCollapsed ? (
-          <div className="text-xs text-default-500 space-y-1">
-            <p className="font-semibold">BLE Device Manager</p>
-            <p>v1.0.0</p>
-          </div>
-        ) : (
-          <div className="flex justify-center">
-            <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-          </div>
-        )}
-      </div>
-    </aside>
+              // Check if current route matches this item or any sub-item
+              const isActive = item.href
+                ? item.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(item.href)
+                : item.subItems?.some((sub) => pathname.startsWith(sub.href));
+
+              return (
+                <li key={item.id}>
+                  {/* Main Menu Item */}
+                  {hasSubItems ? (
+                    <button
+                      onClick={() => toggleMenu(item.id)}
+                      className={clsx(
+                        "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
+                        isActive
+                          ? "bg-primary/10 text-primary"
+                          : "text-default-700 hover:text-primary hover:bg-default-100",
+                        isCollapsed ? "justify-center" : "justify-between"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon
+                          className={clsx(
+                            "w-5 h-5 flex-shrink-0",
+                            isActive ? "text-primary" : "text-default-500"
+                          )}
+                        />
+                        {!isCollapsed && (
+                          <span className="text-sm font-medium">
+                            {item.label}
+                          </span>
+                        )}
+                      </div>
+                      {!isCollapsed && (
+                        <ChevronDown
+                          className={clsx(
+                            "w-4 h-4 transition-transform",
+                            isExpanded ? "rotate-180" : ""
+                          )}
+                        />
+                      )}
+                    </button>
+                  ) : (
+                    <Link
+                      href={item.href!}
+                      className={clsx(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
+                        isActive
+                          ? "bg-primary/10 text-primary"
+                          : "text-default-700 hover:text-primary hover:bg-default-100",
+                        isCollapsed ? "justify-center" : ""
+                      )}
+                    >
+                      <Icon
+                        className={clsx(
+                          "w-5 h-5 flex-shrink-0",
+                          isActive ? "text-primary" : "text-default-500"
+                        )}
+                      />
+                      {!isCollapsed && (
+                        <span className="text-sm font-medium">
+                          {item.label}
+                        </span>
+                      )}
+                    </Link>
+                  )}
+
+                  {/* Sub Menu Items */}
+                  {hasSubItems && !isCollapsed && isExpanded && (
+                    <ul className="mt-1 ml-8 space-y-1">
+                      {item.subItems!.map((subItem) => {
+                        const isSubActive = pathname.startsWith(subItem.href);
+                        return (
+                          <li key={subItem.href}>
+                            <Link
+                              href={subItem.href}
+                              className={clsx(
+                                "flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
+                                isSubActive
+                                  ? "bg-primary/10 text-primary font-medium"
+                                  : "text-default-600 hover:text-primary hover:bg-default-50"
+                              )}
+                            >
+                              <span>{subItem.label}</span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-divider">
+          {!isCollapsed ? (
+            <div className="text-xs text-default-500 space-y-1">
+              <p className="font-semibold">Lyppo Dashboard</p>
+              <p>v1.0.0</p>
+            </div>
+          ) : (
+            <div className="flex justify-center">
+              <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+            </div>
+          )}
+        </div>
+      </aside>
     </>
   );
 };

@@ -15,7 +15,11 @@ export const useDeviceDataContext = () => useContext(DeviceDataContext);
 
 const DEVICE_NAME = "Agyenkwa Device";
 
-export function DeviceDataProvider({ children }: { children: React.ReactNode }) {
+export function DeviceDataProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { updateIfNewer, setLoading } = useDeviceStore();
   const [isInitialized, setIsInitialized] = React.useState(false);
   const mongoIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -82,7 +86,7 @@ export function DeviceDataProvider({ children }: { children: React.ReactNode }) 
 
     mongoIntervalRef.current = setInterval(() => {
       if (mountedRef.current) fetchMongoDBData();
-    }, 10000);
+    }, 50);
 
     return () => {
       mountedRef.current = false;
