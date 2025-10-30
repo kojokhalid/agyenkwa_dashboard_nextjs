@@ -74,7 +74,7 @@ export const DriversTable: React.FC<DriversTableProps> = ({
                 size="sm"
               />
               <div className="flex flex-col">
-                <p className="text-bold text-sm">{item.username}</p>
+                <p className="text-bold text-sm">{item.username || "User1"}</p>
               </div>
             </div>
           );
