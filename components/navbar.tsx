@@ -41,7 +41,7 @@ export const Navbar = () => {
 
     if (deviceData) {
       const stressLevel = deviceData.stress_level;
-      const username = deviceData.username || "Unknown Driver";
+      const username = deviceData.username || "User";
       const timestamp = new Date(
         deviceData.timestamp || deviceData.received_at
       );

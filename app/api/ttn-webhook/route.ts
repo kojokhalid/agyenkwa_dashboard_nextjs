@@ -40,7 +40,7 @@ function extractUsername(payload: any): string {
   if (payload.username) {
     return payload.username;
   }
-  return "Unknown User";
+  return "User";
 }
 
 function extractDeviceInfo(payload: any) {

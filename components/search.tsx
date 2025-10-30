@@ -182,7 +182,7 @@ const Search = () => {
                         </div>
                         <div>
                           <h3 className="font-semibold text-lg">
-                            {device.name || "Unknown Device"}
+                            {device.name || "Device"}
                           </h3>
                         </div>
                       </div>

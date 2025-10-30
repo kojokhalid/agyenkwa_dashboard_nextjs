@@ -80,7 +80,7 @@ export default function IndexPage() {
     return [
       {
         id: "device-current",
-        username: deviceData.username || "Unknown User",
+        username: deviceData.username || "User",
         stress_level: deviceData.stress_level,
         timestamp: deviceData.timestamp,
         timestampValue: deviceData.timestamp || deviceData.received_at,
